@@ -11,15 +11,19 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use App\Mappers\MovieMapper;
-
+use App\Services\MovieViewCounterService;
+use Illuminate\Support\Facades\Redis;
 
 class MovieController extends Controller
 {
 
     protected $movieService;
+    private MovieViewCounterService $viewCounter;
 
-    public function __construct(MovieService $movieService){
+    public function __construct(MovieService $movieService, MovieViewCounterService $viewCounter){
         $this->movieService = $movieService;
+        $this->viewCounter = $viewCounter;
+        
     }
     /**
      * Display a listing of the resource.
@@ -67,9 +71,19 @@ class MovieController extends Controller
      * Display the specified resource.
      */
     public function show(Movie $movie)
-    {
-        //
-    }
+{
+   
+    $this->viewCounter->increment($movie->id);
+    $baseViews = $movie->views;
+    $redisViews = $this->viewCounter->get($movie->id);
+    $totalViews = $baseViews + $redisViews;
+
+    return view('movies.show', [
+        'movie' => $movie,
+        'totalViews' => $totalViews,
+    ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.
@@ -96,17 +110,7 @@ class MovieController extends Controller
 
         $this->movieService->updateMovie($movie, $dto);
         return redirect()->route('movies.index')->with('success', 'Updated!');
-        /*$validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'categories' => 'array',
-            'categories.*' => 'exists:categories,id',
-        ]);
-
     
-        $this->movieService->updateMovie($movie, $validated);
-
-        return redirect()->route('movies.index')->with('success', 'Updated!');*/
-
     }
 
     /**

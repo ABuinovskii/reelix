@@ -31,7 +31,7 @@
             <tbody>
                 @foreach ($movies as $movie)
                     <tr>
-                        <td class="border px-4 py-2">{{ $movie->name }}</td>
+                        <td class="border px-4 py-2"><a href="{{ route('movies.show', $movie) }}">{{ $movie->name }}</a></td>
                         <td class="border px-4 py-2">
                             <a href="{{ route('movies.edit', $movie) }}" class="btn btn-sm btn-primary">Edit</a>
                             <form action="{{ route('movies.destroy', $movie) }}" method="POST" style="display:inline;">
