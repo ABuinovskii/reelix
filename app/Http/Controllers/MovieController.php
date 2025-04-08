@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use App\Mappers\MovieMapper;
 
 
 class MovieController extends Controller
@@ -55,11 +56,11 @@ class MovieController extends Controller
             'categories.*' => 'exists:categories,id',
         ]);
 
-        // Выносим логику в сервис
-        $this->movieService->createMovie($validated);
+        $dto = MovieMapper::fromRequest($request);
 
-        // 4️⃣ Выводим уведомление и перенаправляем обратно
-        return redirect()->route('movies.index')->with('success', 'Фильм успешно добавлен!');
+        $this->movieService->createMovie($dto);
+
+        return redirect()->route('movies.index')->with('success', 'Added!');
     }
 
     /**
@@ -85,17 +86,27 @@ class MovieController extends Controller
      */
     public function update(Request $request, Movie $movie): RedirectResponse 
     {
-            // Валидация данных
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'categories' => 'array',
-                'categories.*' => 'exists:categories,id',
-            ]);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'categories' => 'array',
+            'categories.*' => 'exists:categories,id',
+        ]);
 
-        // Вызываем сервис
+        $dto = MovieMapper::fromRequest($request);
+
+        $this->movieService->updateMovie($movie, $dto);
+        return redirect()->route('movies.index')->with('success', 'Updated!');
+        /*$validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'categories' => 'array',
+            'categories.*' => 'exists:categories,id',
+        ]);
+
+    
         $this->movieService->updateMovie($movie, $validated);
 
-        return redirect()->route('movies.index')->with('success', 'Фильм успешно обновлён!');
+        return redirect()->route('movies.index')->with('success', 'Updated!');*/
+
     }
 
     /**
@@ -103,7 +114,7 @@ class MovieController extends Controller
      */
     public function destroy(Movie $movie): RedirectResponse
     {
-        // Вызываем сервис
+    
         $this->movieService->deleteMovie($movie);
 
         return redirect()->route('movies.index')->with('success', 'Фильм успешно удалён!');

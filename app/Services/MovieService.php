@@ -4,30 +4,32 @@ namespace App\Services;
 use App\Models\Movie;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use App\Dto\MovieDto;
 
 class MovieService
 {
-    public function createMovie(array $data): Movie
+    public function createMovie(MovieDto $dto): Movie
     {
-        $data['user_id'] = Auth::id();
+    $movie = Movie::create([
+        'name' => $dto->name,
+        'user_id' => $dto->userId,
+    ]);
 
-        // Извлекаем категории отдельно
-        $categories = $data['categories'] ?? [];
-        unset($data['categories']);
+    $movie->categories()->attach($dto->categoryIds);
 
-        $movie = Movie::create($data);
-        $movie->categories()->attach($categories);
-
-        return $movie;
-
+    return $movie;
     }
+    
 
-    public function updateMovie(Movie $movie, array $data): bool
+    public function updateMovie(Movie $movie, MovieDto $dto): bool
     {
-        $categories = $data['categories'] ?? [];
-        unset($data['categories']);
+        $categories = $dto->categoryIds ?? [];
+        unset($dto->categoryIds);
 
-        $updated = $movie->update($data);
+    
+        $updated = $movie->update([
+            'name' => $dto->name
+        ]);
         $movie->categories()->sync($categories);
 
         return $updated;
