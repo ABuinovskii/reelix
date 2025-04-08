@@ -23,12 +23,15 @@ class MovieController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $movies = $this->movieService->getAllMovies();
-        return view('movies.index', compact('movies'));
-        
+        $filters = $request->only(['category_id']);
+        $movies = $this->movieService->getFilteredMovies($filters);
+        $categories = Category::all();
+    
+        return view('movies.index', compact('movies', 'categories'));
     }
+
 
     /**
      * Show the form for creating a new resource.

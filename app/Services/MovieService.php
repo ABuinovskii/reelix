@@ -43,4 +43,18 @@ class MovieService
         return Movie::with('categories')->get();
     }
 
+
+    public function getFilteredMovies(array $filters = []): Collection
+    {
+        $query = Movie::with('categories');
+
+        if (!empty($filters['category_id'])) {
+            $query->whereHas('categories', function ($q) use ($filters) {
+                $q->where('categories.id', $filters['category_id']);
+            });
+        }
+
+        return $query->get();
+    }
+
 }
