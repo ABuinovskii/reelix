@@ -123,4 +123,25 @@ class MovieController extends Controller
 
         return redirect()->route('movies.index')->with('success', 'Фильм успешно удалён!');
     }
+
+    public function topViewed()
+{
+    $movies = Movie::with('categories')->get();
+
+    $moviesWithViews = $movies->map(function ($movie) {
+        $baseViews = $movie->views;
+        $redisViews = (int) Redis::get("movie:{$movie->id}:views");
+        $movie->total_views = $baseViews + $redisViews;
+        return $movie;
+    });
+
+    $topViewedMovies = $moviesWithViews
+        ->sortByDesc('total_views')
+        ->take(5);
+
+    return view('movies.top_viewed', [
+        'topViewedMovies' => $topViewedMovies,
+    ]);
+}
+
 }

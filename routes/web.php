@@ -13,6 +13,7 @@ Route::resource('movies', MovieController::class)
     ->middleware(['auth', 'verified'])
     ->names('movies');
 
+Route::get('/top-viewed', [MovieController::class, 'topViewed'])->name('movies.topViewed');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
