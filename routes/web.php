@@ -3,6 +3,7 @@
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
     return view('dashboard');
@@ -21,3 +22,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+
+Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
